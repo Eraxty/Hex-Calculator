@@ -1,62 +1,42 @@
-# Simple Hexadecimal Calculator - Beginner Version
-print("=== SIMPLE HEX CALCULATOR ===")
-print("Type 'quit' to exit")
+# Simple Hexadecimal Calculator
+print("=== HEX CALCULATOR CLI ===")
+print("Supports +, -, *, /, AND, OR, XOR")
+print("Type 'quit' to exit\n")
 
-def hex_to_int(hex_num):
-    """Convert hexadecimal to integer"""
-    return int(hex_num, 16)
-
-def int_to_hex(num):
-    """Convert integer to hexadecimal"""
-    return hex(num).upper()[2:]
+def hex_to_int(h): return int(h, 16)
+def int_to_hex(i): return hex(i).upper()[2:]
 
 while True:
-    try:
-        # Get first number
-        num1 = input("Enter first hex number: ").strip().upper()
-        if num1.lower() == 'quit':
-            break
-            
-        # Get operator
-        operator = input("Enter operator (+, -, *, /): ").strip()
-        if operator.lower() == 'quit':
-            break
-            
-        # Get second number
-        num2 = input("Enter second hex number: ").strip().upper()
-        if num2.lower() == 'quit':
-            break
-        
-        # Convert to integers
-        n1 = hex_to_int(num1)
-        n2 = hex_to_int(num2)
-        
-        # Perform calculation
-        if operator == '+':
-            result = n1 + n2
-        elif operator == '-':
-            result = n1 - n2
-        elif operator == '*':
-            result = n1 * n2
-        elif operator == '/':
-            if n2 == 0:
-                print("Error: Cannot divide by zero!")
-                continue
-            result = n1 // n2  # Integer division
-        else:
-            print("Error: Invalid operator! Use +, -, *, or /")
-            continue
-        
-        # Convert back to hex and display
-        hex_result = int_to_hex(result)
-        print(f"Result: {num1} {operator} {num2} = {hex_result}")
-        print(f"Decimal: {n1} {operator} {n2} = {result}")
-        print("-" * 40)
-        
-    except ValueError:
-        print("Error: Please enter valid hexadecimal numbers (0-9, A-F)")
-    except KeyboardInterrupt:
-        print("\nGoodbye!")
-        break
+    expr = input("Enter expression (e.g., A + F): ").strip().upper()
+    if expr == "QUIT": break
 
-print("Thank you for using the Hex Calculator!")
+    try:
+        parts = expr.split()
+        if len(parts) != 3:
+            print("❌ Format: A + F\n")
+            continue
+
+        a, op, b = parts
+        n1, n2 = hex_to_int(a), hex_to_int(b)
+
+        if op == '+': result = n1 + n2
+        elif op == '-': result = n1 - n2
+        elif op == '*': result = n1 * n2
+        elif op == '/':
+            if n2 == 0:
+                print("❌ Cannot divide by zero!\n")
+                continue
+            result = n1 // n2
+        elif op == 'AND': result = n1 & n2
+        elif op == 'OR': result = n1 | n2
+        elif op == 'XOR': result = n1 ^ n2
+        else:
+            print("❌ Unknown operator!\n")
+            continue
+
+        print(f"HEX Result: {int_to_hex(result)}")
+        print(f"DEC Result: {result}\n" + "-" * 40)
+    except Exception:
+        print("❌ Invalid input (use hex digits 0–9, A–F)\n")
+
+print("Goodbye 👋")

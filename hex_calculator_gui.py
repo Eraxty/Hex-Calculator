@@ -1,115 +1,113 @@
-# GUI Hexadecimal Calculator
+
 import tkinter as tk
 from tkinter import messagebox
 
+
+def hex_to_int(hex_str):
+    return int(hex_str, 16)
+
+def int_to_hex(num):
+    if num < 0:
+        num = (1 << 32) + num  
+    return hex(num).upper()[2:]
+
+
 def calculate():
-    """Perform calculation when = button is pressed"""
     try:
-        expression = display.get()
-        
-        # Replace operators for evaluation
-        expression = expression.replace('×', '*').replace('÷', '/')
-        
-        # Convert hex numbers to decimal for calculation
-        import re
-        
-        def hex_to_dec(match):
-            hex_num = match.group()
-            return str(int(hex_num, 16))
-        
-        # Find all hex numbers and convert to decimal
-        decimal_expression = re.sub(r'[0-9A-F]+', hex_to_dec, expression, flags=re.IGNORECASE)
-        
-        # Calculate result
-        result = eval(decimal_expression)
-        
-        # Convert back to hex
-        hex_result = hex(result).upper()[2:]
-        display.set(hex_result)
-        
+        expr = display.get().strip().upper()
+        expr = expr.replace('×', '*').replace('÷', '/')
+        tokens = expr.split()
+
+        if len(tokens) != 3:
+            messagebox.showerror("Error", "Use format: A + B")
+            return
+
+        a, op, b = tokens
+        n1, n2 = hex_to_int(a), hex_to_int(b)
+
+        if op == '+':
+            result = n1 + n2
+        elif op == '-':
+            result = n1 - n2
+        elif op == '*':
+            result = n1 * n2
+        elif op == '/':
+            if n2 == 0:
+                raise ZeroDivisionError
+            result = n1 // n2
+        elif op.upper() == 'AND':
+            result = n1 & n2
+        elif op.upper() == 'OR':
+            result = n1 | n2
+        elif op.upper() == 'XOR':
+            result = n1 ^ n2
+        else:
+            messagebox.showerror("Error", "Invalid operator!")
+            return
+
+        display.set(int_to_hex(result))
+
     except ZeroDivisionError:
         messagebox.showerror("Error", "Cannot divide by zero!")
         display.set("0")
-    except:
-        messagebox.showerror("Error", "Invalid calculation!")
+    except Exception:
+        messagebox.showerror("Error", "Invalid input!")
         display.set("0")
 
-def button_click(value):
-    """Handle button clicks"""
+def insert(value):
     current = display.get()
-    if current == "0" or current == "Error":
+    if current == "0":
         display.set(value)
     else:
         display.set(current + value)
 
 def clear():
-    """Clear the display"""
     display.set("0")
 
 def backspace():
-    """Remove last character"""
     current = display.get()
-    if len(current) > 1:
-        display.set(current[:-1])
-    else:
-        display.set("0")
+    display.set(current[:-1] if len(current) > 1 else "0")
 
-# Create main window
+
 root = tk.Tk()
 root.title("Hexadecimal Calculator")
-root.geometry("300x400")
+root.geometry("340x480")
 root.resizable(False, False)
 
-# Display variable
-display = tk.StringVar()
-display.set("0")
+display = tk.StringVar(value="0")
 
-# Create display
-display_frame = tk.Frame(root)
-display_frame.pack(pady=10)
+entry = tk.Entry(root, textvariable=display, font=('Consolas', 18),
+                 justify='right', bd=10, relief='sunken')
+entry.pack(fill='x', padx=10, pady=15)
 
-display_entry = tk.Entry(display_frame, textvariable=display, font=('Arial', 16), 
-                        justify='right', state='readonly', width=20)
-display_entry.pack(padx=10, pady=10)
+frame = tk.Frame(root)
+frame.pack()
 
-# Create buttons
-button_frame = tk.Frame(root)
-button_frame.pack(pady=10)
-
-# Button layout
 buttons = [
-    ['7', '8', '9', '/'],
-    ['4', '5', '6', '*'],
-    ['1', '2', '3', '-'],
-    ['0', 'A', 'B', '+'],
-    ['C', 'D', 'E', '='],
-    ['F', 'Clear', '⌫', '']
+    ['A', 'B', 'C', 'D'],
+    ['E', 'F', '7', '8'],
+    ['9', '4', '5', '6'],
+    ['1', '2', '3', '0'],
+    ['+', '-', '×', '÷'],
+    ['AND', 'OR', 'XOR', '='],
+    ['⌫', 'Clear']
 ]
 
-# Create buttons
-for i, row in enumerate(buttons):
-    for j, text in enumerate(row):
-        if text == '=':
-            btn = tk.Button(button_frame, text=text, font=('Arial', 12), 
-                          command=calculate, width=5, height=2, bg='lightblue')
-        elif text == 'Clear':
-            btn = tk.Button(button_frame, text=text, font=('Arial', 12), 
-                          command=clear, width=5, height=2, bg='orange')
-        elif text == '⌫':
-            btn = tk.Button(button_frame, text=text, font=('Arial', 12), 
-                          command=backspace, width=5, height=2, bg='yellow')
-        elif text == '':
-            continue
+for r, row in enumerate(buttons):
+    for c, val in enumerate(row):
+        cmd = None
+        if val == '=':
+            cmd = calculate
+        elif val == 'Clear':
+            cmd = clear
+        elif val == '⌫':
+            cmd = backspace
         else:
-            btn = tk.Button(button_frame, text=text, font=('Arial', 12), 
-                          command=lambda t=text: button_click(t), width=5, height=2)
+            cmd = lambda v=val: insert(f" {v} " if v in ['+', '-', '×', '÷', 'AND', 'OR', 'XOR'] else v)
         
-        btn.grid(row=i, column=j, padx=2, pady=2)
+        tk.Button(frame, text=val, width=6, height=2, font=('Arial', 12),
+                  bg='#e0e0e0' if val not in ['Clear', '='] else '#6cf' if val == '=' else '#f96',
+                  command=cmd).grid(row=r, column=c, padx=3, pady=3)
 
-# Instructions
-instructions = tk.Label(root, text="Enter hex numbers (0-9, A-F) and operations", 
-                       font=('Arial', 10), fg='gray')
-instructions.pack(pady=10)
-
-# Run the application
+tk.Label(root, text="Supports +, -, ×, ÷, AND, OR, XOR", fg='gray').pack(pady=5)
 root.mainloop()
