@@ -34,13 +34,15 @@ A comprehensive hexadecimal calculator that performs arithmetic operations on he
 1. **Download the project files** to your computer  
 2. **Open terminal/command prompt** in the project folder  
 
-### Running the Applications
+## 🚀 Running the Applications
 
-**Command Line Version (CLI):**
+**Commands:**
+
+# Command Line Version (CLI)
 ```bash
 python simple_hex_calc.py
-Graphical Version (GUI):
-
-bash
-Copy code
-python gui_hex_calculator.py
+```
+# Graphical User Interface (GUI)
+```bash
+python hex_calculator_gui.py
+```
